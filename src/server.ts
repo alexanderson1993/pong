@@ -1,4 +1,3 @@
-import type * as Party from "partykit/server";
 import { SnapshotInterpolation } from "@geckos.io/snapshot-interpolation";
 import { snapshotModel, updateModel } from "./playerSchema";
 import {
@@ -7,11 +6,11 @@ import {
   NETWORK_FPS,
   TOTAL_PADDLE_HEIGHT,
 } from "./constants";
-import { parseUUID, uuidToId } from "./uuid";
+import { uuidToId } from "./uuid";
 import { encode } from "@msgpack/msgpack";
+import { routePartykitRequest, Server, type Connection } from "partyserver";
 
-export default class Server implements Party.Server {
-  constructor(readonly room: Party.Room) {}
+export class PongServer extends Server {
   scores = [
     { id: "left", score: 0 },
     { id: "right", score: 0 },
@@ -83,13 +82,13 @@ export default class Server implements Party.Server {
       balls: this.balls.map(({ vx, vy, ...b }) => b),
     });
     if (this.serializeFormat === "byte") {
-      this.room.broadcast(snapshotModel.toBuffer(snapshot));
+      this.broadcast(snapshotModel.toBuffer(snapshot));
     }
     if (this.serializeFormat === "json") {
-      this.room.broadcast(JSON.stringify(snapshot));
+      this.broadcast(JSON.stringify(snapshot));
     }
     if (this.serializeFormat === "msgpack") {
-      this.room.broadcast(encode(snapshot));
+      this.broadcast(encode(snapshot));
     }
 
     for (const ball of this.balls) {
@@ -99,7 +98,7 @@ export default class Server implements Party.Server {
     setTimeout(this.networkLoop.bind(this), 1000 / this.networkFPS);
   }
 
-  onConnect(conn: Party.Connection, ctx: Party.ConnectionContext) {
+  onConnect(conn: Connection) {
     this.players.push({
       id: uuidToId(conn.id),
       x: this.players.length % 2 === 0 ? 0.05 : 0.95,
@@ -113,7 +112,7 @@ export default class Server implements Party.Server {
       this.networkLoop();
     }
   }
-  onClose(connection: Party.Connection): void | Promise<void> {
+  onClose(connection: Connection): void | Promise<void> {
     const playerIndex = this.players.findIndex((p) => p.id === connection.id);
     this.players.splice(playerIndex, 1);
     if (this.players.length === 0) {
@@ -121,7 +120,7 @@ export default class Server implements Party.Server {
     }
   }
 
-  onMessage(message: string | ArrayBuffer, sender: Party.Connection) {
+  onMessage(sender: Connection, message: string | ArrayBuffer) {
     if (message === "ping") {
       return sender.send("pong");
     }
@@ -136,9 +135,7 @@ export default class Server implements Party.Server {
       switch (data.type) {
         case "networkFPS":
           this.networkFPS = data.fps;
-          this.room.broadcast(
-            JSON.stringify({ type: "networkFPS", fps: data.fps })
-          );
+          this.broadcast(JSON.stringify({ type: "networkFPS", fps: data.fps }));
         case "serialize":
           this.serializeFormat = data.method;
       }
@@ -146,4 +143,11 @@ export default class Server implements Party.Server {
   }
 }
 
-Server satisfies Party.Worker;
+export default {
+  fetch(request: Request, env: any) {
+    return (
+      routePartykitRequest(request, env) ||
+      new Response("Not Found", { status: 404 })
+    );
+  },
+};

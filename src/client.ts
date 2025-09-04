@@ -6,8 +6,6 @@ import PartySocket from "partysocket";
 import { NETWORK_FPS } from "./constants";
 import { decode } from "@msgpack/msgpack";
 
-declare const PARTYKIT_HOST: string;
-
 const url = new URL(window.location.toString());
 const isAdmin = url.searchParams.has("admin");
 let SI = new SnapshotInterpolation(NETWORK_FPS);
@@ -83,7 +81,8 @@ const players = new Map<string, HTMLDivElement>();
 // A PartySocket is like a WebSocket, except it's a bit more magical.
 // It handles reconnection logic, buffering messages while it's offline, and more.
 const conn = new PartySocket({
-  host: PARTYKIT_HOST,
+  host: window.location.host,
+  party: "pong-server",
   room: "my-new-room",
 });
 

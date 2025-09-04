@@ -3,17 +3,21 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "partykit dev --live",
-    "deploy": "partykit deploy"
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev",
+    "cf-typegen": "wrangler types",
+    "build": "bun build ./src/client.ts --outdir ./public/dist"
   },
   "dependencies": {
     "@geckos.io/snapshot-interpolation": "^1.1.1",
     "@geckos.io/typed-array-buffer-schema": "^1.2.1",
     "@msgpack/msgpack": "^3.1.2",
-    "partysocket": "^1.0.2"
+    "partyserver": "^0.0.73",
+    "partysocket": "^1.1.5",
+    "wrangler": "^4.33.2"
   },
   "devDependencies": {
-    "partykit": "^0.0.110",
-    "typescript": "^5.5.4"
+    "typescript": "^5.9.2"
   }
 }
