@@ -7,6 +7,9 @@
     "deploy": "partykit deploy"
   },
   "dependencies": {
+    "@geckos.io/snapshot-interpolation": "^1.1.1",
+    "@geckos.io/typed-array-buffer-schema": "^1.2.1",
+    "@msgpack/msgpack": "^3.1.2",
     "partysocket": "^1.0.2"
   },
   "devDependencies": {
