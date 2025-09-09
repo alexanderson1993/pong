@@ -3,7 +3,7 @@ import { snapshotModel, updateModel } from "./playerSchema";
 import "./styles.css";
 
 import PartySocket from "partysocket";
-import { NETWORK_FPS } from "./constants";
+import { NETWORK_FPS, TOTAL_PADDLE_HEIGHT } from "./constants";
 import { decode } from "@msgpack/msgpack";
 
 const url = new URL(window.location.toString());
@@ -43,7 +43,7 @@ if (isAdmin) {
 }
 controls.appendChild(
   Object.assign(document.createElement("label"), {
-    innerHTML: `<input type="radio" id="json" name="transport" /> JSON`,
+    innerHTML: `<input type="radio" id="json" name="transport" checked/> JSON`,
   })
 );
 
@@ -55,7 +55,7 @@ controls.appendChild(
 
 controls.appendChild(
   Object.assign(document.createElement("label"), {
-    innerHTML: `<input type="radio" id="byte" name="transport" checked/> Byte Serialize`,
+    innerHTML: `<input type="radio" id="byte" name="transport"/> Byte Serialize`,
   })
 );
 controls.appendChild(
@@ -199,6 +199,11 @@ conn.addEventListener("message", async (event) => {
       output.appendChild(playerEl);
       players.set(player.id, playerEl);
     }
+
+    // @ts-expect-error
+    playerEl.children[0].style.height = `${
+      (TOTAL_PADDLE_HEIGHT * 100) / (snapshot.state.players.length / 2)
+    }%`;
   }
 
   for (const score of snapshot.state.scores) {

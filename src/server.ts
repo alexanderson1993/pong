@@ -23,7 +23,7 @@ export class PongServer extends Server {
   networkFPS = NETWORK_FPS;
   looping = false;
   lastLoop = Date.now();
-  serializeFormat: "json" | "msgpack" | "byte" = "byte";
+  serializeFormat: "json" | "msgpack" | "byte" = "json";
   loop() {
     if (!this.looping) return;
     const delta = (Date.now() - this.lastLoop) / 1000;
@@ -59,7 +59,7 @@ export class PongServer extends Server {
           player.x,
           player.y,
           player.x + BALL_WIDTH,
-          player.y + TOTAL_PADDLE_HEIGHT,
+          player.y + TOTAL_PADDLE_HEIGHT / (this.players.length / 2),
         ];
         if (ball.x <= paddleBounds[2] && ball.x >= paddleBounds[0]) {
           if (ball.y >= paddleBounds[1] && ball.y <= paddleBounds[3]) {
